@@ -1,6 +1,6 @@
 #############################################################################################
 ### A simple bolilerplate code for 2minlog service.
-### https://raw.githubusercontent.com/X-Horzion/2minlog_public/main/examples/00_hello_world.py
+### https://raw.githubusercontent.com/2minlog/2minlog-examples/main/00-default_code/00_hello_world.py
 ###
 ### - Works if deployed in 2minlog environment, and also in your local environment.
 ### - You need to install the libraries if you want to run it locally on your computer: pip3 install pandas matplotlib
@@ -31,10 +31,10 @@ def covert_to_numeric(df):
 def plotimg(df):
     df = covert_to_numeric(df)
 
-    print(df.head()) # It won't show anything in the cloud, but it does when run locally.
+    print(df.head()) # It won't show anything in the cloud, but it does when ran locally.
 
     plt.figure(figsize=(6.4, 4.8), dpi=100) # 640 x 480 pixels
-    plt.plot(df['delay'])
+    plt.plot(df)
 
     plt.savefig('/tmp/img' + OUTPUT_TYPE, format=OUTPUT_TYPE)
     plt.close()
@@ -109,7 +109,5 @@ if 'TWO_MINLOG_EXECUTION_ENV' not in globals():
         print(80*'*')
         print(result['body'])
         print(80*'*')
-
-
 ### End of code to run locally, mimicking the cloud environment
 #################################################################
