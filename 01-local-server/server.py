@@ -1,5 +1,7 @@
 # This is a server with a similar functionality of logging as https://2minlog.com.
 #
+# Tutorial: https://doc.2minlog.com/tutorials/local-server/
+#
 # You can run this script to set the server. You can log the values in the same format as described here:
 # https://doc.2minlog.com/technical-docs/data-logging. It will create the data.csv file, which you can plot
 # with the same code, as you do in 2minlog.
