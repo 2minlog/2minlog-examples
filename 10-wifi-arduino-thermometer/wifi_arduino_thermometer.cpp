@@ -14,7 +14,7 @@
 // - Better to use Arduino temperature sensor.
 // - Minimal error handling
 // - Consider using a watchdog
-// - No local display
+// - Matrix display with rolling temperature
 
 char ssid[] = "xxxxxxxxxxxx" ;        // your network SSID (name)
 char pass[] = "xxxxxxxxxxxx" ;   // your network password (use for WPA, or use as key for WEP)
@@ -27,11 +27,12 @@ int port      = 443; // If 443, it uses HTTPS, otherwise HTTP.
 char path[]   = "log" ;
 
 // You need to calibrate your thermometer with those two arrays. Add as many points are you like.
-double temperatures[] = { 25, 30 };
-double levels[]       = {189, 228};
+double temperatures[] = { 4.4,   25.4, 30.2 };
+double levels[]       = {75.15, 180.9, 200};
 
 #define voltPin A0
-const int loop_delay = 120000 ; // microseconds
+const int scroll_speed = 400 ;
+const int display_loops = 10 ;
 
 /*
 Tutorials:
@@ -44,9 +45,13 @@ https://www.arduino.cc/reference/en/libraries/wifinina/
 #include "WiFiS3.h"
 #include "WiFiSSLclient.h"
 #include "IPAddress.h"
+#include "ArduinoGraphics.h" // You need to install ArduinoGraphics by Arduino library
+#include "Arduino_LED_Matrix.h"
 
 int status = WL_IDLE_STATUS;
-Client* client;
+Client* client = nullptr ;
+
+ArduinoLEDMatrix matrix;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -117,11 +122,12 @@ void printWifiStatus() {
 void connect_uri(double level, double temperature) {
 /* -------------------------------------------------------------------------- */
 
-  if (port == 443) {
-    client = new WiFiSSLClient();
-  } else {
-    client = new WiFiClient();
-  }
+  if( client == nullptr )
+    if (port == 443) {
+      client = new WiFiSSLClient();
+    } else {
+      client = new WiFiClient();
+    }
 
   Serial.println("\nSetting up connection to server:");
   Serial.println(String(server) + ":" + String(port)) ;
@@ -157,8 +163,8 @@ void connect_uri(double level, double temperature) {
 void disconnect_uri() {
 /* -------------------------------------------------------------------------- */
   client -> stop() ;
-  delete client;
-  client = nullptr;
+  // delete client; // There is a memory leakage in the library.
+  // client = nullptr;
   Serial.println("Done. Disconnected from the server.");
 }
 
@@ -186,7 +192,9 @@ void read_response() {
 ///// Thermometer part
 
 // Least square method temperature = f(level)
+/* -------------------------------------------------------------------------- */
 double linear_regression_temperature(double level) {
+/* -------------------------------------------------------------------------- */
     double sum_T = 0.0, sum_V = 0.0, sum_TV = 0.0, sum_VV = 0.0;
 
     int n = sizeof(temperatures) / sizeof(temperatures[0]) ;
@@ -208,7 +216,9 @@ double linear_regression_temperature(double level) {
 }
 
 
+/* -------------------------------------------------------------------------- */
 void measure_temperature(double &level, double &temperature) {
+/* -------------------------------------------------------------------------- */
   double sum = 0 ;
   int iter = 100 ;
 
@@ -230,6 +240,37 @@ void measure_temperature(double &level, double &temperature) {
 
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/////
+///// LED display part
+/* -------------------------------------------------------------------------- */
+void print_temperature(double temperature, int speed ) {
+/* -------------------------------------------------------------------------- */
+  char text[16];
+
+  sprintf(text, " %.1f°C ", temperature);
+
+  matrix.stroke(0xFFFFFFFF);
+  matrix.textScrollSpeed(speed);
+
+  matrix.textFont(Font_5x7);
+  matrix.beginText(0, 1, 0xFFFFFF);
+  matrix.println(text);
+  matrix.endText(SCROLL_LEFT);
+}
+
+/* -------------------------------------------------------------------------- */
+void init_draw() {
+/* -------------------------------------------------------------------------- */
+  const char text[] = "°C!";
+  matrix.stroke(0xFFFFFFFF);
+  matrix.textFont(Font_4x6);
+  matrix.beginText(0, 1, 0xFFFFFF);
+  matrix.println(text);
+  matrix.endText();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -242,10 +283,15 @@ void setup() {
   Serial.begin(serial_speed);
   Serial.println("Compiled on " __DATE__ " at " __TIME__);
 
+  matrix.begin();
+  matrix.beginDraw();
+  init_draw();
+
   // Always blink the internal LED when reading the temperature
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 }
+
 
 /* -------------------------------------------------------------------------- */
 void loop() {
@@ -263,6 +309,9 @@ void loop() {
   disconnect_uri() ;
   difconnect_wifi() ;
 
-  delay(loop_delay); // Wait after the completion of the loop
+//  delay(loop_delay); // Wait after the completion of the loop
 
+  for( int i = 0 ; i< display_loops ; i++ ) {
+    print_temperature(temperature, scroll_speed ); // Approx. 10 seconds
+  }
 }
