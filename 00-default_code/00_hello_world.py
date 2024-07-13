@@ -17,12 +17,14 @@ import matplotlib.pyplot as plt
 
 def covert_to_numeric(df):
     for column in df.columns:
-        # Make a copy of the original column data
         original_data = df[column].copy()
-        # Attempt to convert the column to numeric types, coerce errors to NaN
-        converted_data = pd.to_numeric(df[column], errors='coerce')
-        # If the conversion introduces NaNs where there weren't any, revert to original data
-        if converted_data.isna().sum() > original_data.isna().sum():
+        original_data = original_data.str.strip()
+        mask_empty = original_data == ''
+        converted_data = pd.to_numeric(original_data, errors='coerce')
+        converted_data_masked = converted_data.copy()
+        converted_data_masked[mask_empty] = '' # Convert empty strings as NaN
+
+        if converted_data_masked.isna().sum() > 0:
             df.loc[:, column] = original_data
         else:
             df.loc[:, column] = converted_data
@@ -94,6 +96,7 @@ if 'TWO_MINLOG_EXECUTION_ENV' not in globals():
             continue
 
         df = pd.DataFrame(data=csv[1:], columns=csv[0])
+        df.columns = df.columns.str.strip() # Strip white spaces around elements
         df.set_index('timestamp', inplace=True)
         df.index = pd.to_datetime(df.index, format='ISO8601')
         dfs.append(df)
