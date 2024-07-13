@@ -19,10 +19,10 @@ def covert_to_numeric(df):
     for column in df.columns:
         original_data = df[column].copy()
         original_data = original_data.str.strip()
-        mask_empty = original_data == ''
+        mask_empty = original_data == '' # Convert empty strings as NaN
         converted_data = pd.to_numeric(original_data, errors='coerce')
         converted_data_masked = converted_data.copy()
-        converted_data_masked[mask_empty] = '' # Convert empty strings as NaN
+        converted_data_masked[mask_empty] = 0
 
         if converted_data_masked.isna().sum() > 0:
             df.loc[:, column] = original_data
