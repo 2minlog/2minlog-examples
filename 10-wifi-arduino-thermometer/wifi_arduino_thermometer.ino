@@ -16,8 +16,8 @@
 // - Consider using a watchdog
 // - Matrix display with rolling temperature
 
-char ssid[] = "xxxxxxxxxxxx" ;        // your network SSID (name)
-char pass[] = "xxxxxxxxxxxx" ;   // your network password (use for WPA, or use as key for WEP)
+char ssid[] = "xxxxxxxxxxxxxxxxxx";        // your network SSID (name)
+char pass[] = "xxxxxxxxxxxxxxxxxx";   // your network password (use for WPA, or use as key for WEP)
 char datasetSecret[] = "SEC-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" ;
 
 const int serial_speed = 115200 ;   // You need to set the serial monitor the same speed
@@ -45,7 +45,7 @@ https://www.arduino.cc/reference/en/libraries/wifinina/
 #include "WiFiS3.h"
 #include "WiFiSSLclient.h"
 #include "IPAddress.h"
-#include "ArduinoGraphics.h" // You need to install ArduinoGraphics by Arduino library
+#include "ArduinoGraphics.h" // You need to install ArduinoGraphcs by Arduino library
 #include "Arduino_LED_Matrix.h"
 
 int status = WL_IDLE_STATUS;
@@ -308,8 +308,6 @@ void loop() {
   read_response() ;
   disconnect_uri() ;
   difconnect_wifi() ;
-
-//  delay(loop_delay); // Wait after the completion of the loop
 
   for( int i = 0 ; i< display_loops ; i++ ) {
     print_temperature(temperature, scroll_speed ); // Approx. 10 seconds
