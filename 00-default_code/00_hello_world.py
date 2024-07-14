@@ -15,23 +15,29 @@ import pandas as pd
 import base64
 import matplotlib.pyplot as plt
 
-def covert_to_numeric(df):
+def covert_to_numeric(df,drop_nonnumeric):
+    columns_to_drop = []
     for column in df.columns:
         original_data = df[column].copy()
         original_data = original_data.str.strip()
-        mask_empty = original_data == '' # Convert empty strings as NaN
+        mask_empty = original_data == ''
         converted_data = pd.to_numeric(original_data, errors='coerce')
         converted_data_masked = converted_data.copy()
-        converted_data_masked[mask_empty] = 0
+        converted_data_masked[mask_empty] = 0 # Convert empty strings as NaN
 
         if converted_data_masked.isna().sum() > 0:
             df.loc[:, column] = original_data
+            columns_to_drop.append(column)
         else:
             df.loc[:, column] = converted_data
+
+    if drop_nonnumeric:
+        df.drop(columns=columns_to_drop, inplace=True)
+
     return df
 
 def plotimg(df):
-    df = covert_to_numeric(df)
+    df = covert_to_numeric(df, drop_nonnumeric=True)
 
     print(df.head()) # It won't show anything in the cloud, but it does when ran locally.
 
