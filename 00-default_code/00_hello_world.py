@@ -83,8 +83,6 @@ def handler(dfs):
 
 #################################################################
 ### Code to run locally, mimicking the cloud environment
-OUTPUT_TYPE = 'jpg'
-
 if 'TWO_MINLOG_EXECUTION_ENV' not in globals():
     import os
     import tempfile
