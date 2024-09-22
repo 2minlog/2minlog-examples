@@ -14,6 +14,7 @@ OUTPUT_TYPE = 'jpg'
 import pandas as pd
 import base64
 import matplotlib.pyplot as plt
+import csv
 
 def covert_to_numeric(df,drop_nonnumeric):
     columns_to_drop = []
@@ -37,6 +38,10 @@ def covert_to_numeric(df,drop_nonnumeric):
     return df
 
 def plotimg(df):
+    """df = dataframe:
+        - df.index - timestamp, not time-zone aware, in UTC.
+        - df[:] - string-formated data
+    """
     df = covert_to_numeric(df, drop_nonnumeric=True)
 
     print(df.head()) # It won't show anything in the cloud, but it does when ran locally.
@@ -92,8 +97,8 @@ if 'TWO_MINLOG_EXECUTION_ENV' not in globals():
     csvs = []
     for DSN in DATASET_NAMES:
         with open( DSN + '.csv', 'r') as f:
-            data = f.readlines()
-            data = [line.strip().split(',') for line in data]
+            reader = csv.reader(f)
+            data = [row for row in reader]
             csvs.append(data)
 
     dfs = []
